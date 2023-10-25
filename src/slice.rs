@@ -112,6 +112,12 @@ impl<T: ReadBuffer> ReadBufferSlice<T> {
     }
 }
 
+// THe whole point of a DMA buffer is to 'send' it into the DMA, which logically can be treated as another thread.
+unsafe impl<T: Send + ReadBuffer> Send for ReadBufferSlice<T> {}
+
+// Its totally okay to read a buffer that is concurrently being read by the DMA.
+unsafe impl<T: Sync + ReadBuffer> Sync for ReadBufferSlice<T> {}
+
 /// A [WriteBufferSlice] is a slice which wraps a [WriteBuffer] and implements [WriteBuffer]
 /// # Use Case
 /// Many HALs use the length of a {Read,Write}Buffer to configure DMA Transfers. However, changing
@@ -226,3 +232,6 @@ unsafe impl<T: WriteBuffer> WriteBuffer for WriteBufferSlice<T> {
         (self.ptr, self.len)
     }
 }
+
+// THe whole point of a DMA buffer is to 'send' it into the DMA, which logically can be treated as another thread.
+unsafe impl<T: Send + WriteBuffer> Send for WriteBufferSlice<T> {}
